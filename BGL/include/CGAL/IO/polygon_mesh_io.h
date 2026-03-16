@@ -22,6 +22,7 @@
 #include <CGAL/boost/graph/IO/STL.h>
 #include <CGAL/boost/graph/IO/VTK.h>
 #include <CGAL/boost/graph/IO/WRL.h>
+#include <CGAL/boost/graph/IO/Gmsh.h>
 #include <CGAL/IO/helpers.h>
 
 #include <fstream>
@@ -86,6 +87,7 @@ bool read_polygon_mesh(std::istream& is,
  * - \ref IOStreamPLY (`.ply`)
  * - \ref IOStreamGocad (`.ts`)
  * - \ref IOStreamVTK (`.vtp`)
+ * - Gmsh (`.msh`)
  *
  * The format is detected from the filename extension (letter case is not important).
  *
@@ -154,6 +156,8 @@ bool read_polygon_mesh(const std::string& fname,
   else if(ext == "vtp")
     return read_VTP(fname, g, np);
 #endif
+  else if(ext == "msh")
+    return read_MSH(fname, g, np);
 
   if(verbose)
   {

@@ -18,6 +18,7 @@
 #include <CGAL/IO/3MF.h>
 #include <CGAL/IO/OBJ.h>
 #include <CGAL/IO/OFF.h>
+#include <CGAL/IO/Gmsh.h>
 #include <CGAL/IO/PLY.h>
 #include <CGAL/IO/STL.h>
 #include <CGAL/IO/VTK.h>
@@ -46,6 +47,7 @@ namespace IO {
  * - \ref IOStreamPLY (`.ply`)
  * - \ref IOStreamGocad (`.ts`)
  * - \ref IOStreamVTK (`.vtp`)
+ * - Gmsh (`.msh`)
  *
  * The format is detected from the filename extension (letter case is not important).
  *
@@ -102,6 +104,10 @@ bool read_polygon_soup(const std::string& fname,
     return read_VTP(fname, points, polygons, np);
 #endif
 
+  else if(ext == "msh") {
+    std::vector<std::vector<typename PolygonRange::value_type::value_type> > cells;
+    return read_MSH(fname, points, polygons, cells);
+  }
   if(verbose)
   {
     std::cerr << "Error: unknown input file extension: " << ext << "\n"

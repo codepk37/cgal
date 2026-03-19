@@ -68,12 +68,15 @@ bool read_MSH(std::istream& is,
       case 26: return 4;  // edge with 4 nodes
       case 27: return 5;  // edge with 5 nodes
       case 28: return 6;  // edge with 6 nodes
-      case 29: return 8;  // edge with 8 nodes
-      case 30: return 20; // edge with 10 nodes
-      case 31: return 26; // edge with 12 nodes
+      case 29: return 20; // third order tetrahedron
+      case 30: return 35; // fourth order tetrahedron
+      case 31: return 56; // fifth order tetrahedron
+      case 92: return 64; // third order hexahedron
+      case 93: return 125; // fourth order hexahedron
       default: return -1;
     }
   };
+  // https://gmsh.info/doc/texinfo/gmsh.html#MSH-file-format
 
   auto classify_element = [&](int elmType, std::vector<Index>&& idxs)
   {
@@ -86,7 +89,10 @@ bool read_MSH(std::istream& is,
       case 16: // serendipity quad
       case 20: // higher order triangle (fallback as polygon)
       case 21:
+      case 22: // higher order quad
       case 23:
+      case 24: // higher order quad
+      case 25: // higher order triangle
         polygons.push_back(std::move(idxs));
         return;
       case 4:  // tetra
@@ -100,8 +106,11 @@ bool read_MSH(std::istream& is,
       case 17: // serendipity hex
       case 18: // serendipity prism
       case 19: // serendipity pyramid
-      case 24:
-      case 25:
+      case 29: // higher order tetrahedra
+      case 30:
+      case 31:
+      case 92: // higher order hexahedra
+      case 93:
         cells.push_back(std::move(idxs));
         return;
       default:

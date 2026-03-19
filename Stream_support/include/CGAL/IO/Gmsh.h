@@ -78,7 +78,7 @@ bool read_MSH(std::istream& is,
   };
   // https://gmsh.info/doc/texinfo/gmsh.html#MSH-file-format
 
-  auto classify_element = [&](int elmType, std::vector<Index>&& idxs)
+  auto classify_element = [&](int elmType, std::vector<Index>&& idxs) -> bool
   {
     switch(elmType)
     {
@@ -94,7 +94,7 @@ bool read_MSH(std::istream& is,
       case 24: // higher order quad
       case 25: // higher order triangle
         polygons.push_back(std::move(idxs));
-        return;
+        return true;
       case 4:  // tetra
       case 5:  // hex
       case 6:  // prism
@@ -112,13 +112,9 @@ bool read_MSH(std::istream& is,
       case 92: // higher order hexahedra
       case 93:
         cells.push_back(std::move(idxs));
-        return;
+        return true;
       default:
-        if(idxs.size() == 3 || idxs.size() == 4)
-          polygons.push_back(std::move(idxs));
-        else if(!idxs.empty())
-          cells.push_back(std::move(idxs));
-        break;
+        return false; // unsupported element type
     }
   };
 
@@ -279,7 +275,8 @@ bool read_MSH(std::istream& is,
               idxs.push_back(static_cast<Index>(it->second));
             }
 
-            classify_element(elmType, std::move(idxs));
+            if(!classify_element(elmType, std::move(idxs)))
+              return false;
           }
 
           read_elements += static_cast<std::size_t>(block_count);
@@ -310,10 +307,17 @@ bool read_MSH(std::istream& is,
             es >> tmp;
           }
 
+          const int node_count = nodes_per_element(elmType);
+          if(node_count < 0)
+            return false;
+
           std::vector<long long> node_ids;
           long long nid;
           while(es >> nid)
             node_ids.push_back(nid);
+
+          if(static_cast<int>(node_ids.size()) != node_count)
+            return false;
 
           std::vector<Index> idxs;
           idxs.reserve(node_ids.size());
@@ -325,7 +329,8 @@ bool read_MSH(std::istream& is,
             idxs.push_back(static_cast<Index>(it->second));
           }
 
-          classify_element(elmType, std::move(idxs));
+          if(!classify_element(elmType, std::move(idxs)))
+            return false;
         }
       }
 

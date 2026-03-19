@@ -88,7 +88,7 @@ bool read_MSH(const std::string& fname,
 #endif
               )
 {
-  std::ifstream is(fname);
+  std::ifstream is(fname, std::ios::binary);
   if(!is) return false;
   return internal::read_MSH_BGL(is, g, np);
 }
